@@ -14,11 +14,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "APTCollectionReusableHeaderView.h"
 
-static NSString * const kDataSourceIdPath = @"http://data.taipei/opendata/datalist/apiAccess?scope=datasetMetadataSearch&q=id:6a3e862a-e1cb-4e44-b989-d35609559463";
-static NSString * const kDataSourcePath = @"http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=f4a75ba9-7721-4363-884d-c3820b0b917c";
-static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/OpenData/AnimalOpenData.aspx";
-
-@interface ViewController () <UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate>
+@interface ViewController () <UISearchBarDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate>
 {
     NSMutableArray *_dogs;
     NSMutableArray *_cats;
@@ -50,7 +46,6 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
         _otherPets = [NSMutableArray array];
         _results = [NSMutableArray array];
         self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
-        self.searchController.searchResultsUpdater = self;
         self.searchController.searchBar.delegate = self;
         self.searchController.delegate = self;
         self.searchController.hidesNavigationBarDuringPresentation = NO;
@@ -60,7 +55,6 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
 
 - (void)updateDate
 {
-    [self loadData];
     if ([self needUpdateSource] || [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"] == nil) {
         [self loadData];
     }
@@ -91,9 +85,8 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
     [self.collectionView addGestureRecognizer:swipeLeft];
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void)adjustmentCollectionViewLayout
 {
-    [super viewWillAppear:animated];
     if (self.collectionView.frame.origin.y < CGRectGetMaxY(self.navigationController.navigationBar.frame)) {
         CGRect frame = self.collectionView.frame;
         frame.origin.y = CGRectGetMaxY(self.navigationController.navigationBar.frame);
@@ -101,14 +94,16 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
     }
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self adjustmentCollectionViewLayout];
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if (self.collectionView.frame.origin.y < CGRectGetMaxY(self.navigationController.navigationBar.frame)) {
-        CGRect frame = self.collectionView.frame;
-        frame.origin.y = CGRectGetMaxY(self.navigationController.navigationBar.frame);
-        self.collectionView.frame = frame;
-    }
+    [self adjustmentCollectionViewLayout];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -129,7 +124,7 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
 
 - (void)lastUpdateTimeWithCompleteHandler:(void(^)(NSDate *date ))completeHandler
 {
-    NSURL *url = [NSURL URLWithString:kDataSourceIdPath];
+    NSURL *url = [NSURL URLWithString:DataSourceIdPath];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
@@ -164,24 +159,17 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
 
 - (void)loadData
 {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"Animal"];
-    
-    NSURL *url = [NSURL URLWithString:kDataSourcePath2];
+    NSURL *url = [NSURL URLWithString:TaipeiDataSourcePath];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (data.length && error == nil) {
-            id info = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-            if ([info isKindOfClass:[NSArray class]]) {
-                NSDictionary *resultInfo = @{@"result":@{@"results":info}};
-                info = resultInfo;
-            }
-            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:info];
-            [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"Animal"];
+            NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"Animal"];
+            [[NSUserDefaults standardUserDefaults] setObject:info forKey:@"Animal"];
             [[NSUserDefaults standardUserDefaults] synchronize];
             
-            NSData *encodedObject = [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"];
-            [self processingDataWithInfo:[NSKeyedUnarchiver unarchiveObjectWithData:encodedObject]];
+            [self processingDataWithInfo:[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"]];
         }
     }];
     [task resume];
@@ -334,7 +322,6 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
         }
         else {
             [self loadData];
-            [self processingDataWithInfo:[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"]];
         }
         _headerView.segmentedControl.selectedSegmentIndex = 0;
         [self.collectionView.collectionViewLayout invalidateLayout];
@@ -346,24 +333,6 @@ static NSString * const kDataSourcePath2 = @"http://data.coa.gov.tw/Service/Open
 {
     if (searchBar.text.length == 0) {
         [self.searchController.searchBar.delegate searchBarCancelButtonClicked:self.searchController.searchBar];
-    }
-}
-
-#pragma mark - UISearchResultsUpdating
-- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
-{
-    if (searchController == self.searchController) {
-        if (searchController.searchBar.text.length) {
-            
-        }
-    }
-}
-
-#pragma mark - UISearchControllerDelegate
-- (void)didPresentSearchController:(UISearchController *)searchController
-{
-    if (searchController == self.searchController) {
-        
     }
 }
 
