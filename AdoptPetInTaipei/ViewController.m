@@ -55,10 +55,10 @@
 
 - (void)updateDate
 {
-    if ([self needUpdateSource] || [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"] == nil) {
+    if ([self needUpdateSource]) {
         [self loadData];
     }
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"] isKindOfClass:[NSDictionary class]]) {
+    else {
         [self processingDataWithInfo:[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"]];
     }
 }
@@ -145,13 +145,10 @@
 
 - (BOOL)needUpdateSource
 {
-    __block BOOL update = NO;
+    __block BOOL update = [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"] == nil;
     [self lastUpdateTimeWithCompleteHandler:^(NSDate *date) {
         if (date) {
-            NSDate *laterDate = [[NSDate date] laterDate:date];
-            if ([laterDate isEqualToDate:date]) {
-                update = YES;
-            }
+            update = [[[NSDate date] laterDate:date] isEqualToDate:date];
         }
     }];
     return update;
@@ -168,8 +165,7 @@
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"Animal"];
             [[NSUserDefaults standardUserDefaults] setObject:info forKey:@"Animal"];
             [[NSUserDefaults standardUserDefaults] synchronize];
-            
-            [self processingDataWithInfo:[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"]];
+            [self processingDataWithInfo:info];
         }
     }];
     [task resume];

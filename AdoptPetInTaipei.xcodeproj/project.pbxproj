@@ -41,10 +41,10 @@
 		052917155B7A07265B704E94 /* Pods-AdoptPetInTaipei.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AdoptPetInTaipei.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AdoptPetInTaipei/Pods-AdoptPetInTaipei.debug.xcconfig"; sourceTree = "<group>"; };
 		226C9B251F466B9F003F60C6 /* AdoptPetInTaipei.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdoptPetInTaipei.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		226C9B291F466B9F003F60C6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		226C9B2B1F466B9F003F60C6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		226C9B2C1F466B9F003F60C6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		226C9B2E1F466B9F003F60C6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		226C9B2F1F466B9F003F60C6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		226C9B2B1F466B9F003F60C6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = AdoptPetInTaipei/AppDelegate.h; sourceTree = "<group>"; };
+		226C9B2C1F466B9F003F60C6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = AdoptPetInTaipei/AppDelegate.m; sourceTree = "<group>"; };
+		226C9B2E1F466B9F003F60C6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = AdoptPetInTaipei/ViewController.h; sourceTree = "<group>"; };
+		226C9B2F1F466B9F003F60C6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = AdoptPetInTaipei/ViewController.m; sourceTree = "<group>"; };
 		226C9B321F466B9F003F60C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		226C9B341F466B9F003F60C6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		226C9B371F466B9F003F60C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -123,10 +123,6 @@
 				22E6D1CC1F46717600ED8386 /* Model */,
 				22E6D1CD1F46719000ED8386 /* Controller */,
 				22E6D1CE1F46719C00ED8386 /* View */,
-				226C9B2B1F466B9F003F60C6 /* AppDelegate.h */,
-				226C9B2C1F466B9F003F60C6 /* AppDelegate.m */,
-				226C9B2E1F466B9F003F60C6 /* ViewController.h */,
-				226C9B2F1F466B9F003F60C6 /* ViewController.m */,
 				22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */,
 				226C9B311F466B9F003F60C6 /* Main.storyboard */,
 				226C9B341F466B9F003F60C6 /* Assets.xcassets */,
@@ -165,6 +161,10 @@
 		22E6D1CD1F46719000ED8386 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				226C9B2B1F466B9F003F60C6 /* AppDelegate.h */,
+				226C9B2C1F466B9F003F60C6 /* AppDelegate.m */,
+				226C9B2E1F466B9F003F60C6 /* ViewController.h */,
+				226C9B2F1F466B9F003F60C6 /* ViewController.m */,
 				22E6D1971F466EEE00ED8386 /* APTAdoptInformationViewController.h */,
 				22E6D1981F466EEE00ED8386 /* APTAdoptInformationViewController.m */,
 				22E6D1991F466EEE00ED8386 /* APTAdoptInformationViewController.xib */,
