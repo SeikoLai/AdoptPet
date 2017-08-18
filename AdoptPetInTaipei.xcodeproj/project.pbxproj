@@ -70,7 +70,7 @@
 		22E6D1A71F466EEE00ED8386 /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DetailViewController.m; path = AdoptPetInTaipei/DetailViewController.m; sourceTree = "<group>"; };
 		22E6D1A81F466EEE00ED8386 /* ImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImageViewController.h; path = AdoptPetInTaipei/ImageViewController.h; sourceTree = "<group>"; };
 		22E6D1A91F466EEE00ED8386 /* ImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImageViewController.m; path = AdoptPetInTaipei/ImageViewController.m; sourceTree = "<group>"; };
-		22E6D1AA1F466EEE00ED8386 /* information.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = information.json; path = AdoptPetInTaipei/information.json; sourceTree = "<group>"; };
+		22E6D1AA1F466EEE00ED8386 /* information.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = information.json; sourceTree = "<group>"; };
 		22E6D1AB1F466EEE00ED8386 /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Map.h; path = AdoptPetInTaipei/Map.h; sourceTree = "<group>"; };
 		22E6D1AC1F466EEE00ED8386 /* Map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Map.m; path = AdoptPetInTaipei/Map.m; sourceTree = "<group>"; };
 		22E6D1AD1F466EEE00ED8386 /* MapsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MapsViewController.h; path = AdoptPetInTaipei/MapsViewController.h; sourceTree = "<group>"; };
@@ -78,11 +78,11 @@
 		22E6D1AF1F466EEE00ED8386 /* MapsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MapsViewController.xib; path = AdoptPetInTaipei/MapsViewController.xib; sourceTree = "<group>"; };
 		22E6D1B01F466EEE00ED8386 /* NoteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NoteViewController.h; path = AdoptPetInTaipei/NoteViewController.h; sourceTree = "<group>"; };
 		22E6D1B11F466EEE00ED8386 /* NoteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NoteViewController.m; path = AdoptPetInTaipei/NoteViewController.m; sourceTree = "<group>"; };
-		22E6D1B21F466EEE00ED8386 /* 寵物委託焚化申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = "寵物委託焚化申請書.pdf"; path = "AdoptPetInTaipei/寵物委託焚化申請書.pdf"; sourceTree = "<group>"; };
-		22E6D1B31F466EEE00ED8386 /* 灑葬區使用申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = "灑葬區使用申請書.pdf"; path = "AdoptPetInTaipei/灑葬區使用申請書.pdf"; sourceTree = "<group>"; };
-		22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = "登記單位.pdf"; path = "AdoptPetInTaipei/登記單位.pdf"; sourceTree = "<group>"; };
-		22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = "絕育補助申請書.pdf"; path = "AdoptPetInTaipei/絕育補助申請書.pdf"; sourceTree = "<group>"; };
-		22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		22E6D1B21F466EEE00ED8386 /* 寵物委託焚化申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "寵物委託焚化申請書.pdf"; sourceTree = "<group>"; };
+		22E6D1B31F466EEE00ED8386 /* 灑葬區使用申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "灑葬區使用申請書.pdf"; sourceTree = "<group>"; };
+		22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "登記單位.pdf"; sourceTree = "<group>"; };
+		22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "絕育補助申請書.pdf"; sourceTree = "<group>"; };
+		22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PrefixHeader.pch; path = ../PrefixHeader.pch; sourceTree = "<group>"; };
 		46164ADB2F4B54FB28F64B72 /* libPods-AdoptPetInTaipei.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AdoptPetInTaipei.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED395906B3CB7EB7FAF13D57 /* Pods-AdoptPetInTaipei.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AdoptPetInTaipei.release.xcconfig"; path = "Pods/Target Support Files/Pods-AdoptPetInTaipei/Pods-AdoptPetInTaipei.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -102,40 +102,6 @@
 		226C9B1C1F466B9F003F60C6 = {
 			isa = PBXGroup;
 			children = (
-				22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */,
-				22E6D1951F466EEE00ED8386 /* Animal.h */,
-				22E6D1961F466EEE00ED8386 /* Animal.m */,
-				22E6D1971F466EEE00ED8386 /* APTAdoptInformationViewController.h */,
-				22E6D1981F466EEE00ED8386 /* APTAdoptInformationViewController.m */,
-				22E6D1991F466EEE00ED8386 /* APTAdoptInformationViewController.xib */,
-				22E6D19A1F466EEE00ED8386 /* APTCollectionReusableHeaderView.h */,
-				22E6D19B1F466EEE00ED8386 /* APTCollectionReusableHeaderView.m */,
-				22E6D19C1F466EEE00ED8386 /* APTCollectionReusableHeaderView.xib */,
-				22E6D19D1F466EEE00ED8386 /* APTInformationViewController.h */,
-				22E6D19E1F466EEE00ED8386 /* APTInformationViewController.m */,
-				22E6D19F1F466EEE00ED8386 /* APTMailViewController.h */,
-				22E6D1A01F466EEE00ED8386 /* APTMailViewController.m */,
-				22E6D1A11F466EEE00ED8386 /* APTMapHelper.h */,
-				22E6D1A21F466EEE00ED8386 /* APTMapHelper.m */,
-				22E6D1A31F466EEE00ED8386 /* CollectionViewCell.h */,
-				22E6D1A41F466EEE00ED8386 /* CollectionViewCell.m */,
-				22E6D1A51F466EEE00ED8386 /* CollectionViewCell.xib */,
-				22E6D1A61F466EEE00ED8386 /* DetailViewController.h */,
-				22E6D1A71F466EEE00ED8386 /* DetailViewController.m */,
-				22E6D1A81F466EEE00ED8386 /* ImageViewController.h */,
-				22E6D1A91F466EEE00ED8386 /* ImageViewController.m */,
-				22E6D1AA1F466EEE00ED8386 /* information.json */,
-				22E6D1AB1F466EEE00ED8386 /* Map.h */,
-				22E6D1AC1F466EEE00ED8386 /* Map.m */,
-				22E6D1AD1F466EEE00ED8386 /* MapsViewController.h */,
-				22E6D1AE1F466EEE00ED8386 /* MapsViewController.m */,
-				22E6D1AF1F466EEE00ED8386 /* MapsViewController.xib */,
-				22E6D1B01F466EEE00ED8386 /* NoteViewController.h */,
-				22E6D1B11F466EEE00ED8386 /* NoteViewController.m */,
-				22E6D1B21F466EEE00ED8386 /* 寵物委託焚化申請書.pdf */,
-				22E6D1B31F466EEE00ED8386 /* 灑葬區使用申請書.pdf */,
-				22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */,
-				22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */,
 				226C9B271F466B9F003F60C6 /* AdoptPetInTaipei */,
 				226C9B261F466B9F003F60C6 /* Products */,
 				397B4D2E88DEA5171042EA1F /* Pods */,
@@ -154,10 +120,14 @@
 		226C9B271F466B9F003F60C6 /* AdoptPetInTaipei */ = {
 			isa = PBXGroup;
 			children = (
+				22E6D1CC1F46717600ED8386 /* Model */,
+				22E6D1CD1F46719000ED8386 /* Controller */,
+				22E6D1CE1F46719C00ED8386 /* View */,
 				226C9B2B1F466B9F003F60C6 /* AppDelegate.h */,
 				226C9B2C1F466B9F003F60C6 /* AppDelegate.m */,
 				226C9B2E1F466B9F003F60C6 /* ViewController.h */,
 				226C9B2F1F466B9F003F60C6 /* ViewController.m */,
+				22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */,
 				226C9B311F466B9F003F60C6 /* Main.storyboard */,
 				226C9B341F466B9F003F60C6 /* Assets.xcassets */,
 				226C9B361F466B9F003F60C6 /* LaunchScreen.storyboard */,
@@ -170,9 +140,66 @@
 		226C9B281F466B9F003F60C6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				22E6D1AA1F466EEE00ED8386 /* information.json */,
+				22E6D1B21F466EEE00ED8386 /* 寵物委託焚化申請書.pdf */,
+				22E6D1B31F466EEE00ED8386 /* 灑葬區使用申請書.pdf */,
+				22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */,
+				22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */,
 				226C9B291F466B9F003F60C6 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		22E6D1CC1F46717600ED8386 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				22E6D1951F466EEE00ED8386 /* Animal.h */,
+				22E6D1961F466EEE00ED8386 /* Animal.m */,
+				22E6D1AB1F466EEE00ED8386 /* Map.h */,
+				22E6D1AC1F466EEE00ED8386 /* Map.m */,
+			);
+			name = Model;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		22E6D1CD1F46719000ED8386 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				22E6D1971F466EEE00ED8386 /* APTAdoptInformationViewController.h */,
+				22E6D1981F466EEE00ED8386 /* APTAdoptInformationViewController.m */,
+				22E6D1991F466EEE00ED8386 /* APTAdoptInformationViewController.xib */,
+				22E6D19D1F466EEE00ED8386 /* APTInformationViewController.h */,
+				22E6D19E1F466EEE00ED8386 /* APTInformationViewController.m */,
+				22E6D19F1F466EEE00ED8386 /* APTMailViewController.h */,
+				22E6D1A01F466EEE00ED8386 /* APTMailViewController.m */,
+				22E6D1A11F466EEE00ED8386 /* APTMapHelper.h */,
+				22E6D1A21F466EEE00ED8386 /* APTMapHelper.m */,
+				22E6D1A61F466EEE00ED8386 /* DetailViewController.h */,
+				22E6D1A71F466EEE00ED8386 /* DetailViewController.m */,
+				22E6D1A81F466EEE00ED8386 /* ImageViewController.h */,
+				22E6D1A91F466EEE00ED8386 /* ImageViewController.m */,
+				22E6D1AD1F466EEE00ED8386 /* MapsViewController.h */,
+				22E6D1AE1F466EEE00ED8386 /* MapsViewController.m */,
+				22E6D1AF1F466EEE00ED8386 /* MapsViewController.xib */,
+				22E6D1B01F466EEE00ED8386 /* NoteViewController.h */,
+				22E6D1B11F466EEE00ED8386 /* NoteViewController.m */,
+			);
+			name = Controller;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		22E6D1CE1F46719C00ED8386 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				22E6D19A1F466EEE00ED8386 /* APTCollectionReusableHeaderView.h */,
+				22E6D19B1F466EEE00ED8386 /* APTCollectionReusableHeaderView.m */,
+				22E6D19C1F466EEE00ED8386 /* APTCollectionReusableHeaderView.xib */,
+				22E6D1A31F466EEE00ED8386 /* CollectionViewCell.h */,
+				22E6D1A41F466EEE00ED8386 /* CollectionViewCell.m */,
+				22E6D1A51F466EEE00ED8386 /* CollectionViewCell.xib */,
+			);
+			name = View;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		397B4D2E88DEA5171042EA1F /* Pods */ = {
