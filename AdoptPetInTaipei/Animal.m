@@ -7,22 +7,21 @@
 //
 
 #import "Animal.h"
-
 //animal_id; // 動物的流水編號
 //animal_subid; // 動物的區域編號
 //animal_area_pkid; // 動物所屬縣市代碼
 //animal_shelter_pkid; // 動物所屬收容所代碼
 //animal_place; // 動物的實際所在地
-//animal_kind; // 動物的類型
-//animal_sex; // 動物性別
-//animal_bodytype; // 動物體型
-//animal_colour; // 動物毛色
-//animal_age; // 動物年紀
-//animal_sterilization; // 是否絕育
-//animal_bacterin; // 是否施打狂犬病疫苗
+//animal_kind; // 動物的類型 [貓 | 狗 | 鳥 ..]
+//animal_sex; // 動物性別 [M | F | N](公、母、未輸入)
+//animal_bodytype; // 動物體型 [MINI | SMALL | MEDIUM | BIG](迷你、小 型、中型、大型)
+//animal_colour; // 動物毛色 [黑色 | 灰色 | 白色.. ]
+//animal_age; // 動物年紀 [CHILD | ADULT](幼年、成年)
+//animal_sterilization; // 是否絕育 [T | F | N](是、否、未輸入)
+//animal_bacterin; // 是否施打狂犬病疫苗 [T | F | N](是、否、未輸入)
 //animal_foundplace; // 動物尋獲地
 //animal_title; // 動物網頁標題
-//animal_status; // 動物狀態
+//animal_status; // 動物狀態 [NONE | OPEN | ADOPTED | OTHER | DEAD] (未公告、開放認養、已認養、其他、死亡)
 //animal_remark; // 資料備註
 //animal_caption; // 其他說明
 //animal_opendate; // 開放認養時間(起)
@@ -71,6 +70,7 @@ static NSString * const kAnimalAge = @"animal_age";
 static NSString * const kAnimalOpendate = @"animal_opendate";
 static NSString * const kShelterAddress = @"shelter_address";
 static NSString * const kShelterTel = @"shelter_tel";
+static NSString * const kAnimalId = @"animal_id";
 
 @implementation Animal
 
@@ -137,49 +137,81 @@ static NSString * const kShelterTel = @"shelter_tel";
 {
     self = [super init];
     if (self) {
-        _name = info[kName];
-        _sex = [info[kSex] isEqualToString:@"雌"] ? @"女生" : @"男生";
-        _type = info[kType];
-        _build = info[kBuild];
-        _age = [info[kAge] isEqualToString:@"幼齡"] ? @"3個月以下" : [info[kAge] isEqualToString:@"年輕"] ? @"3個月至1歲" : [info[kAge] isEqualToString:@"成年"] ? @"1至7歲" : @"7歲以上";
+        _name = info[kAnimalTitle];
+        _sex = [info[kAnimalSex] isEqualToString:@"M"] ? @"男生" : ([info[kAnimalSex] isEqualToString:@"F"] ? @"女生" : @"無資料");
+        _type = info[kAnimalKind];
+        _build = [self bodyFromTypeString:info[kAnimalBodytype]];
+        _age = [info[kAnimalAge] isEqualToString:@"CHILD"] ? @"幼年" : @"成年";
         _variety = info[kVariety];
         _reason = info[kReason];
-        _acceptNum = info[kAcceptNum];
-        _chipNum = info[kChipNum];
-        _sterilization = ![info[kIsSterilization] isEqualToString:@"未絕育"];
-        _hairType = info[kHairType];
-        _note = info[kNote];
-        _resettlement = [info[kResettlement] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]][0];
-        _resettlement = [_resettlement componentsSeparatedByString:@"0"][0];
-        _phone = info[kPhone];
+        _acceptNum = info[kAnimalId];
+        _chipNum = info[kAnimalId];
+        _sterilization = [info[kAnimalSterilization] isEqualToString:@"T"];
+        _hairType = info[kAnimalColour];
+        _note = info[kAnimalRemark];
+        _resettlement = info[kShelterAddress];
+        _phone = info[kShelterTel];
         _email = info[kEmail];
         _childreAnlong = info[kChildreAnlong];
         _animalAnlong = info[kAnimalAnlong];
-        _bodyweight = ((NSString *)info[kBodyweight]).length ? info[kBodyweight] : [info[kBuild] isEqualToString:@"幼"] ? @"9公斤以下"  : [info[kBuild] isEqualToString:@"小"] ? @"9公斤以下" : [info[kBuild] isEqualToString:@"中"] ? @"9至23公斤" : @"23公斤以上";
-        _imageName = info[kImageName];
-        
-        NSString *dateString = [NSString stringWithFormat:@"%ld", ([[_acceptNum substringWithRange:NSMakeRange(0, 7)] integerValue] + 19110000)];
-        if (dateString.length == 8) {
-            _acceptDate = [NSString stringWithFormat:@"%@年%@月%@日", [dateString substringWithRange:NSMakeRange(0, 4)], [dateString substringWithRange:NSMakeRange(4, 2)], [dateString substringWithRange:NSMakeRange(6, 2)]];
-        }
+        _imageName = info[kAlbumFile];
+        _bodyweight = [self bodyweightFromTypeString:info[kAnimalBodytype]];
+        _acceptDate = [NSString stringWithFormat:@"%@年%@月%@日", [info[kAnimalOpendate] substringWithRange:NSMakeRange(0, 4)], [info[kAnimalOpendate] substringWithRange:NSMakeRange(5, 2)], [info[kAnimalOpendate] substringWithRange:NSMakeRange(8, 2)]];
     }
     return self;
 }
 
+- (NSString *)bodyweightFromTypeString:(NSString *)typeString
+{
+    NSString *bodyweight = nil;
+    if ([typeString isEqualToString:@"MINI"]) {
+        bodyweight = @"3公斤以下";
+    }
+    else if ([typeString isEqualToString:@"SMALL"]) {
+        bodyweight = @"3至9公斤";
+    }
+    else if ([typeString isEqualToString:@"MEDIUM"]) {
+        bodyweight = @"9至23公斤";
+    }
+    else if ([typeString isEqualToString:@"BIG"]) {
+        bodyweight = @"23公斤以上";
+    }
+    return bodyweight;
+}
+
+- (NSString *)bodyFromTypeString:(NSString *)typeString
+{
+    NSString *body = nil;
+    if ([typeString isEqualToString:@"MINI"]) {
+        body = @"迷你";
+    }
+    else if ([typeString isEqualToString:@"SMALL"]) {
+        body = @"小型";
+    }
+    else if ([typeString isEqualToString:@"MEDIUM"]) {
+        body = @"中型";
+    }
+    else if ([typeString isEqualToString:@"BIG"]) {
+        body = @"大型";
+    }
+    return body;
+}
+
 - (NSArray<NSDictionary *> *)properties
 {
-    return @[@{@"性別":_sex}, @{@"年紀":_age}, @{@"品種":_variety}, @{@"絕育":_sterilization?@"是":@"否"}, @{@"體型":_build}, @{@"體重":_bodyweight}, @{@"進所原因":_reason}, @{@"晶片號碼":_chipNum}, @{@"毛色":_hairType}, @{@"孩童相處":_childreAnlong}, @{@"動物相處":_animalAnlong}, @{@"收容編號":_acceptNum}, @{@"收容單位":_resettlement}, @{@"收容日期":_acceptDate}, @{@"聯絡電話":_phone}, @{@"聯絡信箱":_email}, @{@"備註":_note}];
+    return @[@{@"性別":_sex}, @{@"年紀":_age}, /*@{@"品種":_variety},*/ @{@"絕育":_sterilization?@"是":@"否"}, @{@"體型":_build}, @{@"體重":_bodyweight}, /*@{@"進所原因":_reason},*/ @{@"晶片號碼":_chipNum}, @{@"毛色":_hairType}, /*@{@"孩童相處":_childreAnlong}, @{@"動物相處":_animalAnlong},*/ @{@"收容編號":_acceptNum}, @{@"收容單位":_resettlement}, @{@"收容日期":_acceptDate}, @{@"聯絡電話":_phone}, /*@{@"聯絡信箱":_email},*/ @{@"備註":_note}];
 }
 
 - (BOOL)matchByToken:(NSString *)token
 {
-    BOOL match = [self.name containsString:token] || [self.sex containsString:token] || ([self.type containsString:token] || [self matchTypeByToken:token]) || [self.build containsString:token] || [self.age containsString:token] || [self.variety containsString:token] || [self.reason containsString:token] || [self.acceptNum containsString:token] || [self.chipNum containsString:token] || ([token isEqualToString:@"絕育"] && self.sterilization) || ([token isEqualToString:@"未絕育"] && !self.sterilization) || ([self.hairType containsString:token] || [token containsString:self.hairType]) || [self.resettlement containsString:token] || [self.phone containsString:token] || [self.email containsString:token] || [self.childreAnlong containsString:token] || [self.animalAnlong containsString:token] || [self matchWeightByToken:token];
+    BOOL match = [self.name containsString:token] || [self.sex containsString:token] || ([self.type containsString:token] || [self matchTypeByToken:token]) || [self.build containsString:token] || [self.age containsString:token] || [self.variety containsString:token] || [self.reason containsString:token] || [self.acceptNum containsString:token] || [self.chipNum containsString:token] || ([token isEqualToString:@"絕育"] && self.sterilization) || ([token isEqualToString:@"未絕育"] && !self.sterilization) || [self.phone containsString:token] || [self matchWeightByToken:token] || ([self matchCountyByToken:token].count > 0 && [self.resettlement containsString:token]) || ([self compareHairColorWithToken:token].length > 0 && [self.hairType containsString:token]);
+    
     return match;
 }
 
 - (BOOL)matchTypeByToken:(NSString *)token
 {
-    if (([token containsString:@"犬"] || [token containsString:@"狗"] || [token containsString:@"汪"] || ([token isEqualToString:@"汪星人"] || [@"汪星人" containsString:token]) || [token isEqualToString:@"汪汪"] || [token isEqualToString:@"狗狗"]) && [self.type isEqualToString:@"犬"]) {
+    if (([token containsString:@"犬"] || [token containsString:@"狗"] || [token containsString:@"汪"] || ([token isEqualToString:@"汪星人"] || [@"汪星人" containsString:token]) || [token isEqualToString:@"汪汪"] || [token isEqualToString:@"狗狗"]) && ([self.type isEqualToString:@"犬"] || [self.type isEqualToString:@"狗"])) {
         return YES;
     }
     else if (([token containsString:@"貓"] || [token containsString:@"喵"] || [token isEqualToString:@"喵喵"] || ([token containsString:@"喵星人"] || [@"喵星人" containsString:token]) || [token isEqualToString:@"貓貓"] || [token isEqualToString:@"貓咪"]) && [self.type isEqualToString:@"貓"]) {
@@ -191,11 +223,44 @@ static NSString * const kShelterTel = @"shelter_tel";
     return NO;
 }
 
+- (NSArray *)hairColors
+{
+    return @[@"紅", @"橙", @"黃", @"綠", @"藍", @"靛", @"紫", @"黑", @"白", @"灰", @"咖啡", @"棕", @"米", @"花"];
+}
+
+- (NSString *)compareHairColorWithToken:(NSString *)token
+{
+    NSArray *colors = [self hairColors];
+    NSString *hairColor = nil;
+    for (NSString *color in colors) {
+        if ([token containsString:color]) {
+            hairColor = color;
+            break;
+        }
+    }
+    return hairColor;
+}
+
+- (NSDictionary *)matchCountyByToken:(NSString *)token
+{
+    NSDictionary *countiesInfos = [self postalCode];
+    NSDictionary *countyInfo = nil;
+    for (NSString *key in [countiesInfos allKeys]) {
+        if ([key containsString:token]) {
+            countyInfo = countiesInfos[key];
+            break;
+        }
+    }
+    return countyInfo;
+}
+
 - (BOOL)matchWeightByToken:(NSString *)token
 {
     NSInteger weight = [token integerValue];
     if (weight > 0) {
-        if (weight < 9 && [self.bodyweight isEqualToString:@"9公斤以下"]) {
+        if (weight < 3 && [self.bodyweight isEqualToString:@"3公斤以下"]) {
+        }
+        else if (weight > 3 && weight < 9 && [self.bodyweight isEqualToString:@"3至9公斤"]) {
             return YES;
         }
         else if (weight >= 9 && weight <= 23 && [self.bodyweight isEqualToString:@"9至23公斤"]) {
@@ -223,6 +288,13 @@ static NSString * const kShelterTel = @"shelter_tel";
         return YES;
     }
     return NO;
+}
+
+- (NSDictionary *)postalCode
+{
+    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"postalCode" ofType:@"json"];
+    NSData *data = [[NSData alloc] initWithContentsOfFile:filePath];
+    return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }
 
 @end

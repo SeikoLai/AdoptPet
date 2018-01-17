@@ -35,6 +35,8 @@
 		22E6D1C91F466EEE00ED8386 /* 登記單位.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */; };
 		22E6D1CA1F466EEE00ED8386 /* 絕育補助申請書.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */; };
 		94C0E225C3CC2D591A474E36 /* libPods-AdoptPetInTaipei.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 46164ADB2F4B54FB28F64B72 /* libPods-AdoptPetInTaipei.a */; };
+		B71E81CF200EF2BF00A689BF /* postalCode.json in Resources */ = {isa = PBXBuildFile; fileRef = B71E81CE200EF2BF00A689BF /* postalCode.json */; };
+		B74A1D05200D949F00A843FF /* ImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = B74A1D04200D949F00A843FF /* ImageDownloader.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +86,9 @@
 		22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "絕育補助申請書.pdf"; sourceTree = "<group>"; };
 		22E6D1CB1F466F3600ED8386 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PrefixHeader.pch; path = ../PrefixHeader.pch; sourceTree = "<group>"; };
 		46164ADB2F4B54FB28F64B72 /* libPods-AdoptPetInTaipei.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AdoptPetInTaipei.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B71E81CE200EF2BF00A689BF /* postalCode.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = postalCode.json; sourceTree = "<group>"; };
+		B74A1D03200D949F00A843FF /* ImageDownloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageDownloader.h; sourceTree = "<group>"; };
+		B74A1D04200D949F00A843FF /* ImageDownloader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImageDownloader.m; sourceTree = "<group>"; };
 		ED395906B3CB7EB7FAF13D57 /* Pods-AdoptPetInTaipei.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AdoptPetInTaipei.release.xcconfig"; path = "Pods/Target Support Files/Pods-AdoptPetInTaipei/Pods-AdoptPetInTaipei.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,6 +147,7 @@
 				22E6D1B41F466EEE00ED8386 /* 登記單位.pdf */,
 				22E6D1B51F466EEE00ED8386 /* 絕育補助申請書.pdf */,
 				226C9B291F466B9F003F60C6 /* main.m */,
+				B71E81CE200EF2BF00A689BF /* postalCode.json */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -183,6 +189,8 @@
 				22E6D1AF1F466EEE00ED8386 /* MapsViewController.xib */,
 				22E6D1B01F466EEE00ED8386 /* NoteViewController.h */,
 				22E6D1B11F466EEE00ED8386 /* NoteViewController.m */,
+				B74A1D03200D949F00A843FF /* ImageDownloader.h */,
+				B74A1D04200D949F00A843FF /* ImageDownloader.m */,
 			);
 			name = Controller;
 			path = ..;
@@ -248,7 +256,7 @@
 		226C9B1D1F466B9F003F60C6 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = SSL;
 				TargetAttributes = {
 					226C9B241F466B9F003F60C6 = {
@@ -281,6 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B71E81CF200EF2BF00A689BF /* postalCode.json in Resources */,
 				22E6D1B81F466EEE00ED8386 /* APTAdoptInformationViewController.xib in Resources */,
 				22E6D1CA1F466EEE00ED8386 /* 絕育補助申請書.pdf in Resources */,
 				22E6D1BA1F466EEE00ED8386 /* APTCollectionReusableHeaderView.xib in Resources */,
@@ -365,6 +374,7 @@
 				22E6D1C41F466EEE00ED8386 /* MapsViewController.m in Sources */,
 				22E6D1BD1F466EEE00ED8386 /* APTMapHelper.m in Sources */,
 				22E6D1C61F466EEE00ED8386 /* NoteViewController.m in Sources */,
+				B74A1D05200D949F00A843FF /* ImageDownloader.m in Sources */,
 				226C9B2A1F466B9F003F60C6 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -401,7 +411,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -409,7 +421,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -449,7 +465,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -457,7 +475,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -490,7 +512,7 @@
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PrefixHeader.pch";
 				INFOPLIST_FILE = AdoptPetInTaipei/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.sam.AdoptPetAtTaipei;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adoptPet.taipei;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -504,7 +526,7 @@
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PrefixHeader.pch";
 				INFOPLIST_FILE = AdoptPetInTaipei/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.sam.AdoptPetAtTaipei;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adoptPet.taipei;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

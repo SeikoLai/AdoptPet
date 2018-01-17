@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface Animal : NSObject
 
@@ -30,6 +31,7 @@
 @property (nonatomic, copy) NSString *bodyweight;// (體重)
 @property (nonatomic, copy) NSString *imageName; //(圖片)
 @property (nonatomic, copy) NSString *acceptDate;
+@property (nonatomic, strong) UIImage *image;
 
 
 + (instancetype)animalWithInfo:(NSDictionary *)info;

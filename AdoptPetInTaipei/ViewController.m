@@ -13,8 +13,9 @@
 #import "DetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "APTCollectionReusableHeaderView.h"
+#import "ImageDownloader.h"
 
-@interface ViewController () <UISearchBarDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate>
+@interface ViewController () <UISearchBarDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate, UIScrollViewDelegate>
 {
     NSMutableArray *_dogs;
     NSMutableArray *_cats;
@@ -24,10 +25,10 @@
     NSMutableArray *_results;
 }
 
-
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (nonatomic, strong) NSMutableArray *animals;
 @property (nonatomic, strong) UISearchController *searchController;
+@property (nonatomic, strong) NSMutableDictionary *imageDownloadsInProgress;
 
 - (IBAction)selectKind:(id)sender;
 
@@ -53,22 +54,13 @@
     return self;
 }
 
-- (void)updateDate
-{
-    if ([self needUpdateSource]) {
-        [self loadData];
-    }
-    else {
-        [self processingDataWithInfo:[[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"]];
-    }
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self.collectionView registerNib:[UINib nibWithNibName:NSStringFromClass([CollectionViewCell class]) bundle:[NSBundle mainBundle]] forCellWithReuseIdentifier:@"Cell"];
     [self.collectionView registerNib:[UINib nibWithNibName:NSStringFromClass([APTCollectionReusableHeaderView class]) bundle:[NSBundle mainBundle]] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"APTCollectionReusableHeaderView"];
     ((UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout).sectionHeadersPinToVisibleBounds = YES;
+    _imageDownloadsInProgress = [NSMutableDictionary dictionary];
     [self updateDate];
     
     UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(didSwipeRight:)];
@@ -85,13 +77,14 @@
     [self.collectionView addGestureRecognizer:swipeLeft];
 }
 
-- (void)adjustmentCollectionViewLayout
+// -------------------------------------------------------------------------------
+//    dealloc
+//  If this view controller is going away, we need to cancel all outstanding downloads.
+// -------------------------------------------------------------------------------
+- (void)dealloc
 {
-    if (self.collectionView.frame.origin.y < CGRectGetMaxY(self.navigationController.navigationBar.frame)) {
-        CGRect frame = self.collectionView.frame;
-        frame.origin.y = CGRectGetMaxY(self.navigationController.navigationBar.frame);
-        self.collectionView.frame = frame;
-    }
+    // terminate all pending download connections
+    [self terminateAllDownloads];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -120,9 +113,12 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+    
+    // terminate all pending download connections
+    [self terminateAllDownloads];
 }
 
-- (void)lastUpdateTimeWithCompleteHandler:(void(^)(NSDate *date ))completeHandler
+- (void)lastUpdateTimeWithCompleteHandler:(void(^)(NSDate *date))completeHandler
 {
     NSURL *url = [NSURL URLWithString:DataSourceIdPath];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -130,8 +126,11 @@
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (data.length && error == nil) {
             NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
-            if (info[@"result"]) {
-                NSArray *results = info[@"result"][@"results"];
+            NSArray *results = info[@"result"][@"results"];
+            if (info[@"result"] == nil || results == nil || results.count == 0) {
+                completeHandler(nil);
+            }
+            else {
                 NSString *dateString = results[0][@"metadata_modified"];
                 NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
                 [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
@@ -141,6 +140,17 @@
         }
     }];
     [task resume];
+}
+
+- (void)updateDate
+{
+    id animalData = [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"];
+    if ([self needUpdateSource] || ![animalData isKindOfClass:[NSArray class]] || animalData == nil) {
+        [self loadData];
+    }
+    else {
+        [self processingDataWithInfo:animalData];
+    }
 }
 
 - (BOOL)needUpdateSource
@@ -156,67 +166,92 @@
 
 - (void)loadData
 {
-    NSURL *url = [NSURL URLWithString:TaipeiDataSourcePath];
+    NSURL *url = [NSURL URLWithString:TaiwanGovDataSourcePath];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (data.length && error == nil) {
-            NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            NSMutableArray *animalInfos = [NSMutableArray arrayWithArray:[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil]];
+            for (NSMutableDictionary *animalInfo in animalInfos) {
+                for (NSString *key in [animalInfo allKeys]) {
+                    if (animalInfo[key] && (animalInfo[key] == NULL || animalInfo[key] == nil || animalInfo[key] == [NSNull null])) {
+                        animalInfo[key] = @"";
+                    }
+                }
+            }
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"Animal"];
-            [[NSUserDefaults standardUserDefaults] setObject:info forKey:@"Animal"];
+            [[NSUserDefaults standardUserDefaults] setObject:animalInfos forKey:@"Animal"];
             [[NSUserDefaults standardUserDefaults] synchronize];
-            [self processingDataWithInfo:info];
+            [self processingDataWithInfo:animalInfos];
+        }
+        else {
+            NSLog(@"Error: %@", error.localizedDescription);
         }
     }];
     [task resume];
     
 }
 
-- (void)processingDataWithInfo:(NSDictionary *)info
+- (void)processingDataWithInfo:(NSArray *)info
 {
-    if (info[@"result"]) {
-        NSArray *results = info[@"result"][@"results"];
-        NSArray *dogInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-            return [evaluatedObject[@"Type"] isEqualToString:@"犬"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"狗"];
-        }]];
-        for (NSDictionary *info in dogInfos) {
-            [_dogs addObject:[Animal animalWithInfo:info]];
-        }
-        if (_dogs.count) {
-            [_pets addObject:_dogs];
-        }
-        _animals = _pets[0];
-        _headerView.segmentedControl.selectedSegmentIndex = 0;
-        if (_animals.count) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.collectionView reloadData];
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    self.searchController.hidesNavigationBarDuringPresentation = NO;
-                    self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
-                    self.searchController.dimsBackgroundDuringPresentation = NO;
-                    self.searchController.searchBar.placeholder = @"搜尋";
-                    self.navigationItem.titleView = self.searchController.searchBar;
-                });
+    if (info == nil || info.count == 0) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"異常" message:@"非常抱歉，目前無法從台北市政府公開資料平台取得資訊，請稍後再試，謝謝。" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *close = [UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleCancel handler:nil];
+        [alertController addAction:close];
+        [self presentViewController:alertController animated:YES completion:nil];
+        return;
+    }
+    
+    NSArray *results = info;
+    NSArray *dogInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [evaluatedObject[@"Type"] isEqualToString:@"犬"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"狗"];
+    }]];
+    for (NSDictionary *info in dogInfos) {
+        [_dogs addObject:[Animal animalWithInfo:info]];
+    }
+    if (_dogs.count) {
+        [_pets addObject:_dogs];
+    }
+    _animals = _pets[0];
+    if (_animals.count) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _headerView.segmentedControl.selectedSegmentIndex = 0;
+            [self.collectionView reloadData];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                self.searchController.hidesNavigationBarDuringPresentation = NO;
+                self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
+                self.searchController.dimsBackgroundDuringPresentation = NO;
+                self.searchController.searchBar.placeholder = @"搜尋";
+                self.navigationItem.titleView = self.searchController.searchBar;
             });
-        }
-        NSArray *catInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-            return [evaluatedObject[@"Type"] isEqualToString:@"貓"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"貓"];
-        }]];
-        for (NSDictionary *info in catInfos) {
-            [_cats addObject:[Animal animalWithInfo:info]];
-        }
-        if (_cats.count) {
-            [_pets addObject:_cats];
-        }
-        NSArray *otherInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-            return [evaluatedObject[@"Type"] isEqualToString:@"其他"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"兔"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"其他"];
-        }]];
-        for (NSDictionary *info in otherInfos) {
-            [_otherPets addObject:[Animal animalWithInfo:info]];
-        }
-        if (_otherPets.count) {
-            [_pets addObject:_otherPets];
-        }
+        });
+    }
+    NSArray *catInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [evaluatedObject[@"Type"] isEqualToString:@"貓"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"貓"];
+    }]];
+    for (NSDictionary *info in catInfos) {
+        [_cats addObject:[Animal animalWithInfo:info]];
+    }
+    if (_cats.count) {
+        [_pets addObject:_cats];
+    }
+    NSArray *otherInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [evaluatedObject[@"Type"] isEqualToString:@"其他"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"兔"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"其他"];
+    }]];
+    for (NSDictionary *info in otherInfos) {
+        [_otherPets addObject:[Animal animalWithInfo:info]];
+    }
+    if (_otherPets.count) {
+        [_pets addObject:_otherPets];
+    }
+}
+
+- (void)adjustmentCollectionViewLayout
+{
+    if (self.collectionView.frame.origin.y < CGRectGetMaxY(self.navigationController.navigationBar.frame)) {
+        CGRect frame = self.collectionView.frame;
+        frame.origin.y = CGRectGetHeight(self.navigationController.navigationBar.frame) + 10.0f;
+        self.collectionView.frame = frame;
     }
 }
 
@@ -229,7 +264,19 @@
 - (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
-    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:((Animal *)_animals[indexPath.item]).imageName]];
+    
+    Animal *animal = _animals[indexPath.item];
+    if (!animal.image) {
+        if (self.collectionView.dragging == NO && self.collectionView.decelerating == NO)
+        {
+            [self startImageDownload:animal forIndexPath:indexPath];
+        }
+        // if a download is deferred or in progress, return a placeholder image
+        cell.imageView.image = _headerView.segmentedControl.selectedSegmentIndex == 0 ? [UIImage imageNamed:@"dog.png"] : (_headerView.segmentedControl.selectedSegmentIndex == 1 ? [UIImage imageNamed:@"cat.png"] : [UIImage imageNamed:@"rabbit.png"]);
+    }
+    else {
+        cell.imageView.image = animal.image;
+    }
     cell.layer.cornerRadius = cell.frame.size.width / 2.0;
     cell.layer.masksToBounds = YES;
     cell.layer.borderWidth = 1.0f;
@@ -286,7 +333,10 @@
         [tagger enumerateTagsInRange:NSMakeRange(0, [searchBar.text length]) scheme:NSLinguisticTagSchemeTokenType options:options usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
             NSString *token = [searchBar.text substringWithRange:tokenRange];
             NSLog(@"%@: %@", token, tag);
-            if (token.length) {
+            if ([token containsString:@"台"]) {
+                token = [token stringByReplacingOccurrencesOfString:@"台" withString:@"臺"];
+            }
+            if (token.length && ![token isEqualToString:@"的"]) {
                 [tokens addObject:token];
             }
         }];
@@ -370,7 +420,7 @@
 {    
     NSUInteger currentIndex = _headerView.segmentedControl.selectedSegmentIndex;
     NSUInteger numberOfSegments = _headerView.segmentedControl.numberOfSegments;
-
+    
     currentIndex++;
     currentIndex %= numberOfSegments;
     
@@ -391,5 +441,91 @@
     [self selectKind:_headerView.segmentedControl];
 }
 
+// -------------------------------------------------------------------------------
+//    terminateAllDownloads
+// -------------------------------------------------------------------------------
+- (void)terminateAllDownloads
+{
+    // terminate all pending download connections
+    NSArray *allDownloads = [self.imageDownloadsInProgress allValues];
+    [allDownloads makeObjectsPerformSelector:NSSelectorFromString(@"cancelDownload")];
+    
+    [self.imageDownloadsInProgress removeAllObjects];
+}
 
+#pragma mark - Table cell image support
+
+// -------------------------------------------------------------------------------
+//    startIconDownload:forIndexPath:
+// -------------------------------------------------------------------------------
+- (void)startImageDownload:(Animal *)animal forIndexPath:(NSIndexPath *)indexPath
+{
+    ImageDownloader *imageDownloader = (self.imageDownloadsInProgress)[indexPath];
+    if (imageDownloader == nil)
+    {
+        imageDownloader = [[ImageDownloader alloc] init];
+        imageDownloader.animal = animal;
+        [imageDownloader setCompletionHandler:^{
+            
+            CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+            
+            // Display the newly loaded image
+            cell.imageView.image = animal.image;
+            
+            // Remove the IconDownloader from the in progress list.
+            // This will result in it being deallocated.
+            [self.imageDownloadsInProgress removeObjectForKey:indexPath];
+            
+        }];
+        (self.imageDownloadsInProgress)[indexPath] = imageDownloader;
+        [imageDownloader startDownload];
+    }
+}
+
+// -------------------------------------------------------------------------------
+//    loadImagesForOnscreenRows
+//  This method is used in case the user scrolled into a set of cells that don't
+//  have their app icons yet.
+// -------------------------------------------------------------------------------
+- (void)loadImagesForOnscreenRows
+{
+    if (self.animals.count > 0)
+    {
+        NSArray *visiblePaths = [self.collectionView indexPathsForVisibleItems];
+        for (NSIndexPath *indexPath in visiblePaths)
+        {
+            Animal *animal = _animals[indexPath.row];
+            
+            if (!animal.image)
+                // Avoid the app icon download if the app already has an icon
+            {
+                [self startImageDownload:animal forIndexPath:indexPath];
+            }
+        }
+    }
+}
+
+
+#pragma mark - UIScrollViewDelegate
+
+// -------------------------------------------------------------------------------
+//    scrollViewDidEndDragging:willDecelerate:
+//  Load images for all onscreen rows when scrolling is finished.
+// -------------------------------------------------------------------------------
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if (!decelerate)
+    {
+        [self loadImagesForOnscreenRows];
+    }
+}
+
+// -------------------------------------------------------------------------------
+//    scrollViewDidEndDecelerating:scrollView
+//  When scrolling stops, proceed to load the app icons that are on screen.
+// -------------------------------------------------------------------------------
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    [self loadImagesForOnscreenRows];
+}
 @end

@@ -26,7 +26,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    if ([self.animal.type isEqualToString:@"犬"]) {
+    if ([self.animal.type isEqualToString:@"狗"]) {
         self.title = self.animal.name.length ? self.animal.name : @"汪星人";
     }
     else if ([self.animal.type isEqualToString:@"貓"]) {
