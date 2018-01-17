@@ -119,31 +119,31 @@
     }
 }
 
-#pragma mark - UITableViewDelegate
-- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
-{
-    return 44.0f;
-}
-- (nullable UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
-{
-    UIView *view = [[UIView alloc] initWithFrame:[tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:[self.animal properties].count-1 inSection:0]].frame];
-    UIButton *adoptButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [adoptButton setTitle:@"認養" forState:UIControlStateNormal];
-    adoptButton.titleLabel.textColor = [UIColor whiteColor];
-    adoptButton.titleLabel.font = [UIFont systemFontOfSize:17.0f];
-    adoptButton.backgroundColor = [UIColor colorWithRed:74.0f/255.0f green:74.0f/255.0f blue:74.0f/255.0f alpha:1.0f];
-    adoptButton.layer.cornerRadius = 3.0f;
-    CGRect frame = ((UITableViewCell *)[tableView visibleCells].lastObject).bounds;
-    frame.origin.x += 10.0f;
-    frame.origin.y += 5.0f;
-    frame.size.width -= 20.0f;
-    frame.size.height -= 10.0f;
-    adoptButton.frame = frame;
-    [adoptButton addTarget:self action:@selector(sendEmail:) forControlEvents:UIControlEventTouchUpInside];
-    
-    [view addSubview:adoptButton];
-    return view;
-}
+//#pragma mark - UITableViewDelegate
+//- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+//{
+//    return 44.0f;
+//}
+//- (nullable UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
+//{
+//    UIView *view = [[UIView alloc] initWithFrame:[tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:[self.animal properties].count-1 inSection:0]].frame];
+//    UIButton *adoptButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [adoptButton setTitle:@"認養" forState:UIControlStateNormal];
+//    adoptButton.titleLabel.textColor = [UIColor whiteColor];
+//    adoptButton.titleLabel.font = [UIFont systemFontOfSize:17.0f];
+//    adoptButton.backgroundColor = [UIColor colorWithRed:74.0f/255.0f green:74.0f/255.0f blue:74.0f/255.0f alpha:1.0f];
+//    adoptButton.layer.cornerRadius = 3.0f;
+//    CGRect frame = ((UITableViewCell *)[tableView visibleCells].lastObject).bounds;
+//    frame.origin.x += 10.0f;
+//    frame.origin.y += 5.0f;
+//    frame.size.width -= 20.0f;
+//    frame.size.height -= 10.0f;
+//    adoptButton.frame = frame;
+//    [adoptButton addTarget:self action:@selector(sendEmail:) forControlEvents:UIControlEventTouchUpInside];
+//
+//    [view addSubview:adoptButton];
+//    return view;
+//}
 
 #pragma mark - Navigation
 - (BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(nullable id)sender
