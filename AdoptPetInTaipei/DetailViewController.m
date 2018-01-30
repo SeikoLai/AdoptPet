@@ -18,6 +18,7 @@
 @interface DetailViewController () {
     Map *_map;
 }
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @end

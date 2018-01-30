@@ -511,6 +511,7 @@
 				DEVELOPMENT_TEAM = 2QK4J8T2NS;
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PrefixHeader.pch";
 				INFOPLIST_FILE = AdoptPetInTaipei/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.adoptPet.taipei;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -525,6 +526,7 @@
 				DEVELOPMENT_TEAM = 2QK4J8T2NS;
 				GCC_PREFIX_HEADER = "$(SRCROOT)/PrefixHeader.pch";
 				INFOPLIST_FILE = AdoptPetInTaipei/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.adoptPet.taipei;
 				PRODUCT_NAME = "$(TARGET_NAME)";

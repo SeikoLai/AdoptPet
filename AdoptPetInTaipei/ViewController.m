@@ -15,6 +15,9 @@
 #import "APTCollectionReusableHeaderView.h"
 #import "ImageDownloader.h"
 
+static NSString * const kLastUpdateDate = @"lastUpdateDate";
+static NSString * const kAnimal = @"Animal";
+
 @interface ViewController () <UISearchBarDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate, UIScrollViewDelegate>
 {
     NSMutableArray *_dogs;
@@ -90,13 +93,13 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self adjustmentCollectionViewLayout];
+    [self adjustCollectionViewLayout];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [self adjustmentCollectionViewLayout];
+    [self adjustCollectionViewLayout];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -104,10 +107,12 @@
     [super viewWillDisappear:animated];
     if ([self.searchController.searchBar becomeFirstResponder]) {
         [self.searchController.searchBar resignFirstResponder];
-        if (self.searchController.searchBar.text.length == 0) {
-            self.searchController.active = NO;
-        }
     }
+    if (self.searchController.searchBar.text.length == 0) {
+        self.searchController.active = NO;
+    }
+    // terminate all pending download connections
+    [self terminateAllDownloads];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -118,49 +123,26 @@
     [self terminateAllDownloads];
 }
 
-- (void)lastUpdateTimeWithCompleteHandler:(void(^)(NSDate *date))completeHandler
-{
-    NSURL *url = [NSURL URLWithString:DataSourceIdPath];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (data.length && error == nil) {
-            NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
-            NSArray *results = info[@"result"][@"results"];
-            if (info[@"result"] == nil || results == nil || results.count == 0) {
-                completeHandler(nil);
-            }
-            else {
-                NSString *dateString = results[0][@"metadata_modified"];
-                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-                NSDate *date = [dateFormatter dateFromString:dateString];
-                completeHandler(date);
-            }
-        }
-    }];
-    [task resume];
-}
-
 - (void)updateDate
 {
-    id animalData = [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"];
-    if ([self needUpdateSource] || ![animalData isKindOfClass:[NSArray class]] || animalData == nil) {
+    if ([self needUpdateSource]) {
         [self loadData];
     }
     else {
-        [self processingDataWithInfo:animalData];
+        [self processingDataWithInfos:[[NSUserDefaults standardUserDefaults] objectForKey:kAnimal]];
     }
 }
 
 - (BOOL)needUpdateSource
 {
-    __block BOOL update = [[NSUserDefaults standardUserDefaults] objectForKey:@"Animal"] == nil;
-    [self lastUpdateTimeWithCompleteHandler:^(NSDate *date) {
-        if (date) {
-            update = [[[NSDate date] laterDate:date] isEqualToDate:date];
-        }
-    }];
+    NSDate *lastUpdateDate = [[NSUserDefaults standardUserDefaults] objectForKey:kLastUpdateDate];
+    id animalData = [[NSUserDefaults standardUserDefaults] objectForKey:kAnimal];
+    
+    BOOL update = ![animalData isKindOfClass:[NSArray class]] || animalData == nil || lastUpdateDate == nil;
+    if (!update) {
+        NSTimeInterval timeInterval = [[NSDate date] timeIntervalSinceDate:lastUpdateDate];
+        update = timeInterval && timeInterval > 60 * 60 * 4;
+    }
     return update;
 }
 
@@ -170,31 +152,38 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (data.length && error == nil) {
-            NSMutableArray *animalInfos = [NSMutableArray arrayWithArray:[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil]];
-            for (NSMutableDictionary *animalInfo in animalInfos) {
-                for (NSString *key in [animalInfo allKeys]) {
-                    if (animalInfo[key] && (animalInfo[key] == NULL || animalInfo[key] == nil || animalInfo[key] == [NSNull null])) {
-                        animalInfo[key] = @"";
-                    }
+        if (data == nil || data.length == 0) {
+            return;
+        }
+        if (error != nil) {
+            NSLog(@"Error: %@", error.localizedDescription);
+            return;
+        }
+        NSMutableArray *animalInfos = [NSMutableArray arrayWithArray:[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil]];
+        if (animalInfos == nil || animalInfos.count == 0) {
+            return;
+        }
+        for (NSMutableDictionary *animalInfo in animalInfos) {
+            for (NSString *key in [animalInfo allKeys]) {
+                if (animalInfo[key] && (animalInfo[key] == NULL || animalInfo[key] == nil || animalInfo[key] == [NSNull null])) {
+                    animalInfo[key] = @"";
                 }
             }
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"Animal"];
-            [[NSUserDefaults standardUserDefaults] setObject:animalInfos forKey:@"Animal"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-            [self processingDataWithInfo:animalInfos];
         }
-        else {
-            NSLog(@"Error: %@", error.localizedDescription);
-        }
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kAnimal];
+        [[NSUserDefaults standardUserDefaults] setObject:animalInfos forKey:kAnimal];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kLastUpdateDate];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kLastUpdateDate];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [self processingDataWithInfos:animalInfos];
     }];
     [task resume];
     
 }
 
-- (void)processingDataWithInfo:(NSArray *)info
+- (void)processingDataWithInfos:(NSArray *)infos
 {
-    if (info == nil || info.count == 0) {
+    if (infos == nil || infos.count == 0 || ![infos isKindOfClass:[NSArray class]]) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"異常" message:@"非常抱歉，目前無法從台北市政府公開資料平台取得資訊，請稍後再試，謝謝。" preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *close = [UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleCancel handler:nil];
         [alertController addAction:close];
@@ -202,8 +191,39 @@
         return;
     }
     
-    NSArray *results = info;
-    NSArray *dogInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    [self filterDogsFromAnimals:infos];
+    [self filterCatsFromAnimals:infos];
+    [self filterOtherAnimalsFromAnimals:infos];
+    [self displayFilteredAnimals];
+}
+
+- (void)displayFilteredAnimals {
+    if (_pets == nil || _pets.count == 0 || ((NSArray *)_pets[0]).count == 0) {
+        NSLog(@"Error: Have no animal");
+        return;
+    }
+    _animals = _pets[0];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _headerView.segmentedControl.selectedSegmentIndex = 0;
+        [self.collectionView reloadData];
+        [self adjustSerchBarLayout];
+    });
+}
+
+- (void)adjustSerchBarLayout
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.searchController.hidesNavigationBarDuringPresentation = NO;
+        self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
+        self.searchController.dimsBackgroundDuringPresentation = NO;
+        self.searchController.searchBar.placeholder = @"搜尋";
+        self.navigationItem.titleView = self.searchController.searchBar;
+    });
+}
+
+- (void)filterDogsFromAnimals:(NSArray *)animals
+{
+    NSArray *dogInfos = [animals filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
         return [evaluatedObject[@"Type"] isEqualToString:@"犬"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"狗"];
     }]];
     for (NSDictionary *info in dogInfos) {
@@ -212,21 +232,11 @@
     if (_dogs.count) {
         [_pets addObject:_dogs];
     }
-    _animals = _pets[0];
-    if (_animals.count) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            _headerView.segmentedControl.selectedSegmentIndex = 0;
-            [self.collectionView reloadData];
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                self.searchController.hidesNavigationBarDuringPresentation = NO;
-                self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
-                self.searchController.dimsBackgroundDuringPresentation = NO;
-                self.searchController.searchBar.placeholder = @"搜尋";
-                self.navigationItem.titleView = self.searchController.searchBar;
-            });
-        });
-    }
-    NSArray *catInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+}
+
+- (void)filterCatsFromAnimals:(NSArray *)animals
+{
+    NSArray *catInfos = [animals filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
         return [evaluatedObject[@"Type"] isEqualToString:@"貓"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"貓"];
     }]];
     for (NSDictionary *info in catInfos) {
@@ -235,7 +245,10 @@
     if (_cats.count) {
         [_pets addObject:_cats];
     }
-    NSArray *otherInfos = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+}
+
+- (void)filterOtherAnimalsFromAnimals:(NSArray *)infos {
+    NSArray *otherInfos = [infos filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
         return [evaluatedObject[@"Type"] isEqualToString:@"其他"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"兔"] || [evaluatedObject[@"animal_kind"] isEqualToString:@"其他"];
     }]];
     for (NSDictionary *info in otherInfos) {
@@ -246,7 +259,7 @@
     }
 }
 
-- (void)adjustmentCollectionViewLayout
+- (void)adjustCollectionViewLayout
 {
     if (self.collectionView.frame.origin.y < CGRectGetMaxY(self.navigationController.navigationBar.frame)) {
         CGRect frame = self.collectionView.frame;
@@ -325,54 +338,55 @@
 #pragma mark - UISearchBarDelegate
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-    if (searchBar.text.length) {
-        NSLinguisticTaggerOptions options = NSLinguisticTaggerOmitWhitespace | NSLinguisticTaggerOmitPunctuation;
-        NSLinguisticTagger *tagger = [[NSLinguisticTagger alloc] initWithTagSchemes: [NSLinguisticTagger availableTagSchemesForLanguage:@"zh-Hant"] options:options];
-        tagger.string = searchBar.text;
-        NSMutableSet *tokens = [NSMutableSet set];
-        [tagger enumerateTagsInRange:NSMakeRange(0, [searchBar.text length]) scheme:NSLinguisticTagSchemeTokenType options:options usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
-            NSString *token = [searchBar.text substringWithRange:tokenRange];
-            NSLog(@"%@: %@", token, tag);
-            if ([token containsString:@"台"]) {
-                token = [token stringByReplacingOccurrencesOfString:@"台" withString:@"臺"];
-            }
-            if (token.length && ![token isEqualToString:@"的"]) {
-                [tokens addObject:token];
-            }
-        }];
-        
-        NSArray *results = [[self resultSetFromLinguisticTokens:[tokens allObjects]] allObjects];
-        if (results.count) {
-            if (_results.count) {
-                [_results removeAllObjects];
-            }
-            _results = [results mutableCopy];
-            _animals = _results;
-            [self.collectionView.collectionViewLayout invalidateLayout];
-            [self.collectionView reloadData];
-        }
-        else {
-            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:[NSString stringWithFormat:@"找不到%@，換個關鍵字試試看吧", searchBar.text] preferredStyle:UIAlertControllerStyleAlert];
-            [alertController addAction:[UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleDefault handler:nil]];
-            [self presentViewController:alertController animated:YES completion:nil];
-        }
+    if (searchBar.text.length == 0 || searchBar.text == nil) {
+        return;
     }
+    
+    NSLinguisticTaggerOptions options = NSLinguisticTaggerOmitWhitespace | NSLinguisticTaggerOmitPunctuation;
+    NSLinguisticTagger *tagger = [[NSLinguisticTagger alloc] initWithTagSchemes:[NSLinguisticTagger availableTagSchemesForLanguage:@"zh-Hant"] options:options];
+    tagger.string = searchBar.text;
+    NSMutableSet *tokens = [NSMutableSet set];
+    [tagger enumerateTagsInRange:NSMakeRange(0, [searchBar.text length]) scheme:NSLinguisticTagSchemeTokenType options:options usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
+        NSString *token = [searchBar.text substringWithRange:tokenRange];
+        NSLog(@"%@: %@", token, tag);
+        if ([token containsString:@"台"]) {
+            token = [token stringByReplacingOccurrencesOfString:@"台" withString:@"臺"];
+        }
+        if (token.length && ![token isEqualToString:@"的"]) {
+            [tokens addObject:token];
+        }
+    }];
+    
+    NSArray *results = [[self resultSetFromLinguisticTokens:[tokens allObjects]] allObjects];
+    if (results.count == 0) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:[NSString stringWithFormat:@"找不到%@，換個關鍵字試試看吧", searchBar.text] preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alertController animated:YES completion:nil];
+    }
+    if (_results.count > 0) {
+        [_results removeAllObjects];
+    }
+    _results = [results mutableCopy];
+    _animals = _results;
+    [self.collectionView.collectionViewLayout invalidateLayout];
+    [self.collectionView reloadData];
 }
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
-    if (searchBar) {
-        [_results removeAllObjects];
-        if (((NSArray *)_pets[0]).count) {
-            _animals = _pets[0];
-        }
-        else {
-            [self loadData];
-        }
-        _headerView.segmentedControl.selectedSegmentIndex = 0;
-        [self.collectionView.collectionViewLayout invalidateLayout];
-        [self.collectionView reloadData];
+    if (searchBar == nil) {
+        return;
     }
+    [_results removeAllObjects];
+    if (((NSArray *)_pets[0]).count) {
+        _animals = _pets[0];
+    }
+    else {
+        [self loadData];
+    }
+    _headerView.segmentedControl.selectedSegmentIndex = 0;
+    [self.collectionView.collectionViewLayout invalidateLayout];
+    [self.collectionView reloadData];
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
@@ -387,19 +401,21 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"DetailViewController"]) {
         Animal *animal = _animals[((NSIndexPath *)[self.collectionView indexPathsForSelectedItems][0]).item];
-        if (animal) {
-            DetailViewController *destinationViewController = segue.destinationViewController;
-            destinationViewController.animal = animal;
+        if (animal == nil) {
+            return;
         }
+        DetailViewController *destinationViewController = segue.destinationViewController;
+        destinationViewController.animal = animal;
     }
 }
 
 - (IBAction)selectKind:(id)sender {
-    if (sender && _animals.count) {
-        _animals = _pets[((UISegmentedControl *)sender).selectedSegmentIndex];
-        [self.collectionView reloadData];
-        self.collectionView.contentOffset = CGPointZero;
-    }
+    if (sender == nil || ![sender isKindOfClass:[UISegmentedControl class]] || _animals == nil || _animals.count == 0) {
+        return;
+    }    
+    _animals = _pets[((UISegmentedControl *)sender).selectedSegmentIndex];
+    [self.collectionView reloadData];
+    self.collectionView.contentOffset = CGPointZero;
 }
 
 - (NSMutableSet *)resultSetFromLinguisticTokens:(NSArray *)tokens
