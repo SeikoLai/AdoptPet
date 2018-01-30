@@ -175,11 +175,7 @@
         
         UIAlertAction *callout = [UIAlertAction actionWithTitle:@"通話" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
             NSURL *phoneNumber = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"tel:%@", phone]];
-            [[UIApplication sharedApplication] openURL:phoneNumber options:@{UIApplicationOpenURLOptionUniversalLinksOnly : @YES} completionHandler:^(BOOL success) {
-                if (success) {
-                    
-                }
-            }];
+            [[UIApplication sharedApplication] openURL:phoneNumber options:@{UIApplicationOpenURLOptionUniversalLinksOnly : @YES} completionHandler:nil];
         }];
         [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
         [alertController addAction:callout];
